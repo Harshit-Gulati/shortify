@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -16,14 +17,34 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 export const Stats = () => {
   const shortUrlRef = useRef<HTMLInputElement>(null);
   const [visits, setVisits] = useState(-1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [err, setErr] = useState("");
+
+  const isValid = (url: string) => {
+    try {
+      const parsedUrl = new URL(url);
+      return parsedUrl.href.startsWith("https://shortify-zohe.onrender.com");
+    } catch (e) {
+      return false;
+    }
+  };
 
   const handleSubmit = async () => {
+    setIsLoading(true);
+    setErr("");
     try {
-      const urlHash = shortUrlRef.current?.value.split(BACKEND_URL + "/")[1];
-      const res = await axios.get(`${BACKEND_URL}/stats/${urlHash}`);
-      setVisits(res.data.visits);
+      if (shortUrlRef.current?.value && isValid(shortUrlRef.current.value)) {
+        const urlHash = shortUrlRef.current?.value.split(BACKEND_URL + "/")[1];
+        const res = await axios.get(`${BACKEND_URL}/stats/${urlHash}`);
+        setVisits(res.data.visits);
+      } else {
+        setErr("Invalid link!");
+        return;
+      }
     } catch (e) {
       console.error(e);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -53,12 +74,36 @@ export const Stats = () => {
               placeholder="Enter short link here"
               className="bg-[#09090B] text-white"
             />
-            {visits !== -1 && <span className="text-xl w-full flex justify-center mt-4 font-semibold">Total Visits: {visits}</span>}
+            {err !== "" && (
+              <span
+                className="p-2 
+            flex justify-center w-full text-red-500"
+              >
+                {err}
+              </span>
+            )}
+            {visits !== -1 && (
+              <span className="text-xl w-full flex justify-center mt-4 font-semibold">
+                Total Visits: {visits}
+              </span>
+            )}
           </CardContent>
           <CardFooter>
-            <Button variant="default" className="w-full" onClick={handleSubmit}>
-              Shorten
-            </Button>
+            {!isLoading && (
+              <Button
+                variant="default"
+                className="w-full"
+                onClick={handleSubmit}
+              >
+                Check Stats
+              </Button>
+            )}
+            {isLoading && (
+              <Button disabled className="w-full" variant="default">
+                <Loader2 className="animate-spin" />
+                Please wait
+              </Button>
+            )}
           </CardFooter>
         </Card>
       </div>

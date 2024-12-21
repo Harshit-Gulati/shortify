@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -18,6 +19,7 @@ export const Landing = () => {
   const [shortUrl, setShortUrl] = useState("");
   const [urlImg, setUrlImg] = useState("");
   const [err, setErr] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const isValid = (url: string) => {
     try {
@@ -30,6 +32,7 @@ export const Landing = () => {
 
   const handleSubmit = async () => {
     setErr("");
+    setIsLoading(true);
     try {
       if (inputRef.current?.value && isValid(inputRef.current.value)) {
         const res = await axios.post(`${BACKEND_URL}/api/shorten`, {
@@ -44,6 +47,8 @@ export const Landing = () => {
       }
     } catch (e) {
       console.error(e);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -51,19 +56,25 @@ export const Landing = () => {
     <div className="bg-[#09090B] h-screen w-screen flex flex-col items-center">
       <div className="w-screen flex justify-center">
         <nav className="w-screen lg:w-4/5 p-3 flex items-center justify-between fixed">
-        <Link to="/">
-          <span className="text-white font-bold text-2xl tracking-tighter hover:text-purple-400 transition-all">
-            Shortify
-          </span>
-        </Link>
-        <Link to="/stats" className={buttonVariants({ variant: "secondary" })}>
-          Check Stats
-        </Link>
-      </nav></div>
+          <Link to="/">
+            <span className="text-white font-bold text-2xl tracking-tighter hover:text-purple-400 transition-all">
+              Shortify
+            </span>
+          </Link>
+          <Link
+            to="/stats"
+            className={buttonVariants({ variant: "secondary" })}
+          >
+            Check Stats
+          </Link>
+        </nav>
+      </div>
       <div className="m-auto">
         <Card className="w-[350px]">
           <CardHeader>
-            <CardTitle className="text-2xl text-center">Shorten your link</CardTitle>
+            <CardTitle className="text-2xl text-center">
+              Shorten your link
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <Input
@@ -72,7 +83,11 @@ export const Landing = () => {
               placeholder="Enter long link here"
               className="bg-[#09090B] text-white"
             />
-            {err !== "" && <span className="p-2 text-red-500">{err}</span>}
+            {err !== "" && (
+              <span className="p-2 flex justify-center w-full text-red-500">
+                {err}
+              </span>
+            )}
             {shortUrl !== "" && (
               <div className="flex flex-col">
                 <div className="flex w-full max-w-sm items-center space-x-2 mt-4">
@@ -97,9 +112,21 @@ export const Landing = () => {
             )}
           </CardContent>
           <CardFooter>
-            <Button variant="default" className="w-full" onClick={handleSubmit}>
-              Shorten
-            </Button>
+            {!isLoading && (
+              <Button
+                variant="default"
+                className="w-full"
+                onClick={handleSubmit}
+              >
+                Shorten
+              </Button>
+            )}
+            {isLoading && (
+              <Button disabled className="w-full" variant="default">
+                <Loader2 className="animate-spin" />
+                Please wait
+              </Button>
+            )}
           </CardFooter>
         </Card>
       </div>
