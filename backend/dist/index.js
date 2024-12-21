@@ -64,6 +64,11 @@ function random(len) {
     }
     return ans;
 }
+app.get("/api", (req, res) => {
+    res.status(200).json({
+        message: "OK",
+    });
+});
 app.post("/api/shorten", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { originalUrl } = req.body;

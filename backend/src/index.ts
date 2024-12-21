@@ -23,6 +23,12 @@ function random(len: number) {
   return ans;
 }
 
+app.get("/api", (req: Request, res: Response) => {
+  res.status(200).json({
+    message: "OK",
+  });
+});
+
 app.post("/api/shorten", async (req: Request, res: Response) => {
   try {
     const { originalUrl } = req.body;
